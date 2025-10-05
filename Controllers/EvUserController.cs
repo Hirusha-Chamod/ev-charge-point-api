@@ -1,3 +1,14 @@
+// --------------------------------------------------------------------------------------------------------------------
+// <project>EV Charging Station Management</project>
+// <file>EvUserController.cs</file>
+// <author>Thilochana J M (IT22899224)</author>
+// <module>SE4040 - Enterprise Application Development</module>
+// <date>2025-10-08</date>
+// <summary>
+//   API controller for managing EV users, including registration, login, profile updates, and deactivation.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
 using ev_charge_point_api.Dtos;
 using ev_charge_point_api.Models;
 using ev_charge_point_api.Services;
@@ -10,12 +21,21 @@ using System.Security.Claims;
 public class EvUserController : ControllerBase
 {
     private readonly EvUserService _service;
+    private readonly AuthService _authService;
 
-    public EvUserController(EvUserService service)
+    public EvUserController(EvUserService service, AuthService authService)
     {
         _service = service;
+        _authService = authService;
     }
 
+    // Public login endpoint for EV owners (mobile app)
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    {
+        var result = await _authService.LoginEvUserAsync(request.Email, request.Password);
+        return Ok(result);
+    }
     // Public registration endpoint used by the mobile app
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] CreateEvUserDto dto)
@@ -91,4 +111,11 @@ public class EvUserController : ControllerBase
         if (!ok) return NotFound();
         return NoContent();
     }
+
+}
+
+public class LoginRequest
+{
+    public string Email { get; set; }
+    public string Password { get; set; }
 }

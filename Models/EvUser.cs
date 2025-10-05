@@ -1,3 +1,14 @@
+// --------------------------------------------------------------------------------------------------------------------
+// <project>EV Charging Station Management</project>
+// <file>EvUser.cs</file>
+// <author>Thilochana J M (IT22899224)</author>
+// <module>SE4040 - Enterprise Application Development</module>
+// <date>2025-10-08</date>
+// <summary>
+//   Model representing an EV user entity.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace ev_charge_point_api.Models

@@ -1,3 +1,14 @@
+// --------------------------------------------------------------------------------------------------------------------
+// <project>EV Charging Station Management</project>
+// <file>EvUserService.cs</file>
+// <author>Thilochana J M (IT22899224)</author>
+// <module>SE4040 - Enterprise Application Development</module>
+// <date>2025-10-08</date>
+// <summary>
+//   Service class implementing business logic for EV user management.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
 using ev_charge_point_api.Models;
 using ev_charge_point_api.Repositories;
 

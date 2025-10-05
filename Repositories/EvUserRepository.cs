@@ -1,3 +1,14 @@
+// --------------------------------------------------------------------------------------------------------------------
+// <project>EV Charging Station Management</project>
+// <file>EvUserRepository.cs</file>
+// <author>Thilochana J M (IT22899224)</author>
+// <module>SE4040 - Enterprise Application Development</module>
+// <date>2025-10-08</date>
+// <summary>
+//   Repository for data access operations on EV users.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
 using ev_charge_point_api.Models;
 using ev_charge_point_api.Services;
 using MongoDB.Driver;
