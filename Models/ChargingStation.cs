@@ -1,3 +1,13 @@
+// --------------------------------------------------------------------------------------------------------------------
+// <project>EV Charging Station Management</project>
+// <file>ChargingStation.cs</file>
+// <author>Jayarathne H.C.D (IT22311290)</author>
+// <module>SE4040 - Enterprise Application Development</module>
+// <date>2025-10-06</date>
+// <summary>
+//   Represents the database model for a single EV Charging Station, including its properties and nested data.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
