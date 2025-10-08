@@ -71,7 +71,7 @@ builder.Services.AddSingleton<MongoDBService>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<IChargingStationRepository, ChargingStationRepository>();
 builder.Services.AddScoped<RefreshTokenRepository>();
-
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
 // Services
 builder.Services.AddScoped<UserService>();
