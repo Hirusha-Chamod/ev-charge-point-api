@@ -1,19 +1,21 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <project>EV Charging Station Management</project>
-// <file>Slot.cs</file>
-// <author>Jayarathne H.C.D (IT22311290)</author>
+// <file>BookingStatus.cs</file>
+// <author>Senanayake S.M.A.S.N (IT22305282)</author
 // <module>SE4040 - Enterprise Application Development</module>
-// <date>2025-10-06</date>
+// <date>2025-10-08</date>
 // <summary>
-//   Defines the data model for a single charging slot within a Charging Station.
+//   Defines the BookingStatus enumeration representing possible states of a booking.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace ev_charge_point_api.Models
 {
-    public class Slot
+    public enum BookingStatus
     {
-        public int SlotId { get; set; }
-        public bool IsAvailable { get; set; } = true;
+        Pending,
+        Approved,
+        Cancelled,
+        Completed
     }
 }

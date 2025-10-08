@@ -15,7 +15,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //cors
-
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins"; 
     builder.Services.AddCors(options =>
     {
@@ -78,6 +77,7 @@ builder.Services.AddScoped<RefreshTokenRepository>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IChargingStationService, ChargingStationService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
 
 var app = builder.Build();
 
