@@ -48,11 +48,13 @@ builder.Services.AddSingleton<MongoDBService>();
 // Repositories
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<IChargingStationRepository, ChargingStationRepository>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
 // Services
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IChargingStationService, ChargingStationService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
 
 var app = builder.Build();
 
