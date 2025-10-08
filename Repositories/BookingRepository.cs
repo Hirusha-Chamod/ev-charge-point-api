@@ -1,3 +1,15 @@
+// --------------------------------------------------------------------------------------------------------------------
+// <project>EV Charging Station Management</project>
+// <file>BookingService.cs</file>
+// <author>Senanayake S.M.A.S.N (IT22305282)</author>
+// <module>SE4040 - Enterprise Application Development</module>
+// <date>2025-10-08</date>
+// <summary>
+//   Implements the data access layer for Bookings, interacting with MongoDB
+//   to perform CRUD operations and complex queries.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
 using ev_charge_point_api.Models;
 using ev_charge_point_api.Services;
 using MongoDB.Driver;

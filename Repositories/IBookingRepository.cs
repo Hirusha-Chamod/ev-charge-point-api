@@ -1,3 +1,15 @@
+// --------------------------------------------------------------------------------------------------------------------
+// <project>EV Charging Station Management</project>
+// <file>BookingService.cs</file>
+// <author>Senanayake S.M.A.S.N (IT22305282)</author>
+// <module>SE4040 - Enterprise Application Development</module>
+// <date>2025-10-08</date>
+// <summary>
+//   Defines the contract for Booking data access operations,
+//   abstracting the underlying database interactions.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
 using ev_charge_point_api.Models;
 
 namespace ev_charge_point_api.Repositories
