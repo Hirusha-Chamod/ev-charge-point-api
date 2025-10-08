@@ -16,7 +16,7 @@ namespace ev_charge_point_api.Models
 
     public enum RoleType
     {
-        Backoffice,
+        BackOffice,
         StationOperator
     }
 }
