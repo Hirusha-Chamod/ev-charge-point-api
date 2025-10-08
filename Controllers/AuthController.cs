@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -12,15 +13,20 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    public async Task<IActionResult> Login(LoginRequest request)
     {
-        var response = await _authService.LoginAsync(request.Email, request.Password);
-        return Ok(response);
+        var (token, refreshToken) = await _authService.AuthenticateAsync(request.Email, request.Password);
+        return Ok(new
+        {
+            accessToken = token,
+            refreshToken = refreshToken
+        });
     }
-}
 
-public class LoginRequest
-{
-    public string Email { get; set; }
-    public string Password { get; set; }
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh([FromBody] string refreshToken)
+    {
+        var (newToken, newRefreshToken) = await _authService.RefreshAsync(refreshToken);
+        return Ok(new { accessToken = newToken, refreshToken = newRefreshToken });
+    }
 }

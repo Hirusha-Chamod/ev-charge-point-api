@@ -1,68 +1,95 @@
 ﻿using ev_charge_point_api.Models;
-using Microsoft.Extensions.Options;
+using ev_charge_point_api.Repositories;
+using ev_charge_point_api.Settings;
 using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using ev_charge_point_api.Settings;
-using ev_charge_point_api.Repositories;
+using System.Threading.Tasks;
 
 public class AuthService
 {
-    private readonly JwtSettings _jwtSettings;
     private readonly UserRepository _userRepository;
+    private readonly RefreshTokenRepository _refreshTokenRepository;
+    private readonly JwtSettings _jwtSettings;
 
-    public AuthService(IOptions<JwtSettings> jwtSettings, UserRepository userRepository)
+    public AuthService(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository, JwtSettings jwtSettings)
     {
-        _jwtSettings = jwtSettings.Value;
         _userRepository = userRepository;
+        _refreshTokenRepository = refreshTokenRepository;
+        _jwtSettings = jwtSettings;
     }
 
-    public async Task<object> LoginAsync(string email, string password)
+    public async Task<(string token, string refreshToken)> AuthenticateAsync(string email, string password)
     {
         var user = await _userRepository.GetByEmailAsync(email);
         if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
-            throw new UnauthorizedAccessException("Invalid email or password");
+            throw new Exception("Invalid credentials");
 
-        var token = GenerateJwtToken(user);
+        var jwtToken = GenerateJwtToken(user);
 
-        return new
+        // 🔑 create refresh token
+        var refreshToken = new RefreshToken
         {
-            token,
-            user = new
-            {
-                user.Id,
-                user.Name,
-                user.Email,
-                Role = user.Role.ToString()
-            }
+            Token = Guid.NewGuid().ToString(),
+            UserId = user.Id,
+            ExpiryDate = DateTime.UtcNow.AddDays(7)
         };
+
+        await _refreshTokenRepository.SaveTokenAsync(refreshToken);
+
+        return (jwtToken, refreshToken.Token);
     }
 
+    public async Task<(string token, string refreshToken)> RefreshAsync(string token)
+    {
+        var existing = await _refreshTokenRepository.GetByTokenAsync(token);
+        if (existing == null || existing.ExpiryDate < DateTime.UtcNow)
+            throw new Exception("Invalid or expired refresh token");
+
+        var user = await _userRepository.GetByIdAsync(existing.UserId);
+        if (user == null)
+            throw new Exception("User not found");
+
+        await _refreshTokenRepository.DeleteAsync(token); // old one no longer valid
+
+        var newToken = GenerateJwtToken(user);
+        var newRefresh = new RefreshToken
+        {
+            Token = Guid.NewGuid().ToString(),
+            UserId = user.Id,
+            ExpiryDate = DateTime.UtcNow.AddDays(7)
+        };
+        await _refreshTokenRepository.SaveTokenAsync(newRefresh);
+
+        return (newToken, newRefresh.Token);
+    }
 
     private string GenerateJwtToken(User user)
     {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(_jwtSettings.Key);
+        var handler = new JwtSecurityTokenHandler();
+        var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Name, user.Name),
             new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Name, user.Name),
             new Claim(ClaimTypes.Role, user.Role.ToString())
         };
 
-        var tokenDescriptor = new SecurityTokenDescriptor
+        var descriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiresInMinutes),
+            Expires = DateTime.UtcNow.AddHours(2),
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             Issuer = _jwtSettings.Issuer,
-            Audience = _jwtSettings.Audience,
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            Audience = _jwtSettings.Audience
         };
 
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
+        var token = handler.CreateToken(descriptor);
+        return handler.WriteToken(token);
     }
 }

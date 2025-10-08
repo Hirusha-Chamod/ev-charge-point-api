@@ -1,4 +1,5 @@
 ﻿using ev_charge_point_api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -12,6 +13,7 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
+    [Authorize(Roles = "Backoffice")]
     [HttpGet]
     public Task<List<User>> GetAll() => _userService.GetAllUsersAsync();
 
