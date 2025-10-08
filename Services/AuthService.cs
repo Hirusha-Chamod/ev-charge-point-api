@@ -14,16 +14,38 @@ public class AuthService
     private readonly UserRepository _userRepository;
     private readonly RefreshTokenRepository _refreshTokenRepository;
     private readonly JwtSettings _jwtSettings;
+    private readonly EvUserRepository _evUserRepository;
 
     public AuthService(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository, JwtSettings jwtSettings)
+    public AuthService(IOptions<JwtSettings> jwtSettings, UserRepository userRepository, EvUserRepository evUserRepository)
     {
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
         _jwtSettings = jwtSettings;
+        _evUserRepository = evUserRepository;
     }
 
     public async Task<(string token, string refreshToken)> AuthenticateAsync(string email, string password)
     {
+        // Try EvUser first (mobile EV owners)
+        var evUser = await _evUserRepository.GetByEmailAsync(email);
+        if (evUser != null)
+        {
+            if (!evUser.IsActive)
+                throw new UnauthorizedAccessException("Account is deactivated");
+
+            if (!BCrypt.Net.BCrypt.Verify(password, evUser.Password))
+                throw new UnauthorizedAccessException("Invalid email or password");
+
+            var token = GenerateJwtTokenForEvUser(evUser);
+            return new
+            {
+                token,
+                user = new { Nic = evUser.Nic, evUser.Name, evUser.Email, Role = "EVOwner" }
+            };
+        }
+
+        // Fallback to internal users
         var user = await _userRepository.GetByEmailAsync(email);
         if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
             throw new Exception("Invalid credentials");
@@ -68,6 +90,47 @@ public class AuthService
     }
 
     private string GenerateJwtToken(User user)
+        var token2 = GenerateJwtTokenForInternalUser(user);
+        return new
+        {
+            token = token2,
+            user = new
+            {
+                Id = user.Id,
+                user.Name,
+                user.Email,
+                Role = user.Role.ToString()
+            }
+        };
+    }
+
+    private string GenerateJwtTokenForEvUser(EvUser user)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.UTF8.GetBytes(_jwtSettings.Key);
+
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Nic),
+            new Claim(ClaimTypes.Name, user.Name),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, "EVOwner")
+        };
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiresInMinutes),
+            Issuer = _jwtSettings.Issuer,
+            Audience = _jwtSettings.Audience,
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
+    }
+
+    private string GenerateJwtTokenForInternalUser(User user)
     {
         var handler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
