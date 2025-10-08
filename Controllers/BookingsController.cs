@@ -1,3 +1,15 @@
+// --------------------------------------------------------------------------------------------------------------------
+// <project>EV Charging Station Management</project>
+// <file>BookingService.cs</file>
+// <author>Senanayake S.M.A.S.N (IT22305282)</author>
+// <module>SE4040 - Enterprise Application Development</module>
+// <date>2025-10-08</date>
+// <summary>
+//   Implements the API endpoints for managing Bookings, handling HTTP requests
+//   and responses, and delegating business logic to the BookingService.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
 using ev_charge_point_api.Dtos;
 using ev_charge_point_api.Models;
 using ev_charge_point_api.Services;

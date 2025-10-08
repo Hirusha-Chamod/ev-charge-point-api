@@ -13,20 +13,21 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginRequest request)
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var (token, refreshToken) = await _authService.AuthenticateAsync(request.Email, request.Password);
-        return Ok(new
-        {
-            accessToken = token,
-            refreshToken = refreshToken
-        });
+        var result = await _authService.LoginAsync(request.Email, request.Password);
+        return Ok(result);
     }
 
     [HttpPost("refresh")]
-    public async Task<IActionResult> Refresh([FromBody] string refreshToken)
+    public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
     {
-        var (newToken, newRefreshToken) = await _authService.RefreshAsync(refreshToken);
-        return Ok(new { accessToken = newToken, refreshToken = newRefreshToken });
+        var result = await _authService.RefreshAsync(request.RefreshToken);
+        return Ok(result);
+    }
+
+    public class RefreshRequest
+    {
+        public string RefreshToken { get; set; }
     }
 }

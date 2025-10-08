@@ -1,4 +1,15 @@
-using System;
+// --------------------------------------------------------------------------------------------------------------------
+// <project>EV Charging Station Management</project>
+// <file>BookingService.cs</file>
+// <author>Senanayake S.M.A.S.N (IT22305282)</author>
+// <module>SE4040 - Enterprise Application Development</module>
+// <date>2025-10-08</date>
+// <summary>
+//   Defines the data transfer object for updating a booking,
+//   encapsulating fields that can be modified.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
 using System.ComponentModel.DataAnnotations;
 using ev_charge_point_api.Models;
 
