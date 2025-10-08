@@ -19,7 +19,6 @@ namespace ev_charge_point_api.Controllers
 {
     [ApiController]
     [Route("api/stations")]
-    [Authorize] // CLASS-LEVEL RULE: Every endpoint in this controller requires the user to be logged in.
     public class ChargingStationsController : ControllerBase
     {
         private readonly IChargingStationService _stationService;
@@ -60,7 +59,7 @@ namespace ev_charge_point_api.Controllers
 
         // Creates a new station
         [HttpPost]
-        [Authorize(Roles = "Backoffice,StationOperator")] // OVERRIDE: Must be logged in AND have the "Backoffice" role.
+
         public async Task<IActionResult> Create([FromBody] CreateStationDto createDto)
         {
             if (!ModelState.IsValid)
@@ -71,9 +70,22 @@ namespace ev_charge_point_api.Controllers
             return CreatedAtAction(nameof(GetById), new { id = newStation.Id }, newStation);
         }
 
+        // Updates an existing station
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(string id, [FromBody] ev_charge_point_api.Models.ChargingStation stationData)
+        {
+            var success = await _stationService.UpdateStationAsync(id, stationData);
+            if (!success)
+            {
+
+                return NotFound();
+            }
+
+            return NoContent();
+        }
+
         // Deactivates a station
         [HttpPatch("{id}/deactivate")]
-        [Authorize(Roles = "Backoffice,StationOperator")] // OVERRIDE: Must be logged in AND have the "Backoffice" role.
         public async Task<IActionResult> Deactivate(string id)
         {
             var success = await _stationService.DeactivateStationAsync(id);

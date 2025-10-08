@@ -66,6 +66,20 @@ namespace ev_charge_point_api.Services
             return await _stationRepository.GetByIdAsync(id);
         }
 
+        // Updates an existing charging station.
+        public async Task<bool> UpdateStationAsync(string id, ChargingStation stationData)
+        {
+            var existingStation = await _stationRepository.GetByIdAsync(id);
+            if (existingStation is null)
+            {
+                return false;
+            }
+
+            stationData.Id = id;
+
+            return await _stationRepository.UpdateAsync(stationData);
+        }
+
         // Finds all charging stations near a specified geographic location.
         public async Task<IEnumerable<ChargingStation>> GetNearbyStationsAsync(double longitude, double latitude)
         {
