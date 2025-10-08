@@ -67,17 +67,32 @@ namespace ev_charge_point_api.Services
         }
 
         // Updates an existing charging station.
-        public async Task<bool> UpdateStationAsync(string id, ChargingStation stationData)
+        public async Task<bool> UpdateStationAsync(string id, UpdateStationDto updateDto)
         {
-            var existingStation = await _stationRepository.GetByIdAsync(id);
-            if (existingStation is null)
+            var stationToUpdate = await _stationRepository.GetByIdAsync(id);
+            if (stationToUpdate is null)
             {
                 return false;
             }
 
-            stationData.Id = id;
+            // Apply changes from the DTO only if the properties are not null
+            if (updateDto.Name is not null)
+            {
+                stationToUpdate.Name = updateDto.Name;
+            }
+            if (updateDto.Type is not null)
+            {
+                stationToUpdate.Type = updateDto.Type;
+            }
 
-            return await _stationRepository.UpdateAsync(stationData);
+            if (updateDto.Latitude.HasValue && updateDto.Longitude.HasValue)
+            {
+                stationToUpdate.Location.Coordinates[1] = updateDto.Latitude.Value;
+                stationToUpdate.Location.Coordinates[0] = updateDto.Longitude.Value;
+            }
+
+
+            return await _stationRepository.UpdateAsync(stationToUpdate);
         }
 
         // Finds all charging stations near a specified geographic location.

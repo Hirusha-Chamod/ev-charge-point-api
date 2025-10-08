@@ -54,7 +54,15 @@ namespace ev_charge_point_api.Repositories
         // Replaces an existing charging station document with an updated version.
         public async Task<bool> UpdateAsync(ChargingStation station)
         {
-            var result = await _stationsCollection.ReplaceOneAsync(s => s.Id == station.Id, station);
+            var filter = Builders<ChargingStation>.Filter.Eq(s => s.Id, station.Id);
+
+            var update = Builders<ChargingStation>.Update
+                .Set(s => s.Name, station.Name)
+                .Set(s => s.Type, station.Type)
+                .Set(s => s.Location, station.Location);
+
+            var result = await _stationsCollection.UpdateOneAsync(filter, update);
+
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
 

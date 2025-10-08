@@ -29,7 +29,7 @@ namespace ev_charge_point_api.Services
         Task<ChargingStation> CreateStationAsync(CreateStationDto createDto);
 
         // Updates an existing charging station.
-        Task<bool> UpdateStationAsync(string id, ChargingStation stationData);
+        Task<bool> UpdateStationAsync(string id, UpdateStationDto updateDto);
 
         // Deactivates a charging station, subject to business rules.
         Task<bool> DeactivateStationAsync(string id);

@@ -19,6 +19,7 @@ namespace ev_charge_point_api.Controllers
 {
     [ApiController]
     [Route("api/stations")]
+    [Authorize] // All endpoints require authentication by default
     public class ChargingStationsController : ControllerBase
     {
         private readonly IChargingStationService _stationService;
@@ -59,7 +60,7 @@ namespace ev_charge_point_api.Controllers
 
         // Creates a new station
         [HttpPost]
-
+        [Authorize(Roles = "BackOffice,StationOperator")]
         public async Task<IActionResult> Create([FromBody] CreateStationDto createDto)
         {
             if (!ModelState.IsValid)
@@ -72,13 +73,14 @@ namespace ev_charge_point_api.Controllers
 
         // Updates an existing station
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] ev_charge_point_api.Models.ChargingStation stationData)
+        [Authorize(Roles = "BackOffice,StationOperator")]
+        public async Task<IActionResult> Update(string id, [FromBody] UpdateStationDto updateDto)
         {
-            var success = await _stationService.UpdateStationAsync(id, stationData);
+            var success = await _stationService.UpdateStationAsync(id, updateDto);
+
             if (!success)
             {
-
-                return NotFound();
+                return NotFound("Station with the provided ID not found.");
             }
 
             return NoContent();
@@ -86,6 +88,7 @@ namespace ev_charge_point_api.Controllers
 
         // Deactivates a station
         [HttpPatch("{id}/deactivate")]
+        [Authorize(Roles = "BackOffice,StationOperator")]
         public async Task<IActionResult> Deactivate(string id)
         {
             var success = await _stationService.DeactivateStationAsync(id);
