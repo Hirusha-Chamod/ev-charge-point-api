@@ -19,6 +19,10 @@ namespace ev_charge_point_api.Dtos
     {
         public BookingStatus? Status { get; set; }
 
-        public DateTime? ReservationDateTime { get; set; }
+        public DateTime? BookingDate { get; set; }
+
+        public DateTime? StartTime { get; set; }
+
+        public DateTime? EndTime { get; set; }
     }
 }

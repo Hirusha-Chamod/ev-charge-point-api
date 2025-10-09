@@ -27,6 +27,12 @@ namespace ev_charge_point_api.Dtos
         public int SlotId { get; set; }
 
         [Required]
-        public DateTime ReservationDateTime { get; set; }
+        public DateTime BookingDate { get; set; }
+
+        [Required]
+        public DateTime StartTime { get; set; }
+
+        [Required]
+        public DateTime EndTime { get; set; }
     }
 }

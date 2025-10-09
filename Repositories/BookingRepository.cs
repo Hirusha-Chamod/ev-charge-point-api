@@ -73,7 +73,7 @@ namespace ev_charge_point_api.Repositories
             var filter = Builders<Booking>.Filter.And(
                 Builders<Booking>.Filter.Eq(b => b.StationId, stationId),
                 Builders<Booking>.Filter.Ne(b => b.Status, BookingStatus.Cancelled),
-                Builders<Booking>.Filter.Gte(b => b.ReservationDateTime, DateTime.UtcNow)
+                Builders<Booking>.Filter.Gte(b => b.BookingDate, DateTime.UtcNow.Date)
             );
 
             return await _bookingsCollection.Find(filter).ToListAsync();

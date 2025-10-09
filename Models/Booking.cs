@@ -33,9 +33,17 @@ namespace ev_charge_point_api.Models
         [BsonElement("slotId")]
         public int SlotId { get; set; }
 
-        // Reservation date/time
-        [BsonElement("reservationDateTime")]
-        public DateTime ReservationDateTime { get; set; }
+        // Date of the booking
+        [BsonElement("bookingDate")]
+        public DateTime BookingDate { get; set; }
+
+        // Start time of the booking
+        [BsonElement("startTime")]
+        public DateTime StartTime { get; set; }
+
+        // End time of the booking
+        [BsonElement("endTime")]
+        public DateTime EndTime { get; set; }
 
         // Status of bookin.
         [BsonElement("status")]

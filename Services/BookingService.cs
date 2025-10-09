@@ -55,23 +55,53 @@ namespace ev_charge_point_api.Services
             if (station == null || !station.IsActive)
                 throw new InvalidOperationException("Station not found or inactive.");
 
-            // apply 7-day rule
-            var now = DateTime.UtcNow;
-            var diff = (createDto.ReservationDateTime - now).TotalDays;
-            if (diff > 7 || diff < 0)
+            // Validate booking date is not in the past
+            var bookingDateOnly = createDto.BookingDate.Date;
+            var today = DateTime.UtcNow.Date;
+            if (bookingDateOnly < today)
+                throw new InvalidOperationException("Booking date cannot be in the past.");
+
+            // apply 7-day rule for booking date
+            var diff = (bookingDateOnly - today).TotalDays;
+            if (diff > 7)
                 throw new InvalidOperationException("Reservation must be within 7 days from now.");
+
+            // Validate start time is before end time
+            if (createDto.StartTime >= createDto.EndTime)
+                throw new InvalidOperationException("Start time must be before end time.");
+
+            // Ensure booking duration is reasonable (e.g., max 24 hours)
+            var duration = (createDto.EndTime - createDto.StartTime).TotalHours;
+            if (duration > 24)
+                throw new InvalidOperationException("Booking duration cannot exceed 24 hours.");
 
             // Ensure slot exists
             var slotExists = station.Slots != null && station.Slots.Any(s => s.SlotId == createDto.SlotId);
             if (!slotExists)
                 throw new InvalidOperationException("Invalid slot selected.");
 
+            // Check for overlapping bookings at the same slot on the same date (prevent double-booking)
+            var existingBookings = await _bookingRepository.GetAllAsync();
+            var conflictingBooking = existingBookings.FirstOrDefault(b => 
+                b.StationId == createDto.StationId && 
+                b.SlotId == createDto.SlotId && 
+                b.BookingDate.Date == createDto.BookingDate.Date &&
+                b.Status != BookingStatus.Cancelled &&
+                b.IsActive &&
+                // Check for time overlap: new booking overlaps if it starts before existing ends and ends after existing starts
+                createDto.StartTime < b.EndTime && createDto.EndTime > b.StartTime);
+
+            if (conflictingBooking != null)
+                throw new InvalidOperationException("This slot is already booked during the selected time period on this date.");
+
             var booking = new Booking
             {
                 EvOwnerNic = createDto.EvOwnerNic,
                 StationId = createDto.StationId,
                 SlotId = createDto.SlotId,
-                ReservationDateTime = createDto.ReservationDateTime,
+                BookingDate = createDto.BookingDate,
+                StartTime = createDto.StartTime,
+                EndTime = createDto.EndTime,
                 Status = BookingStatus.Pending,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
@@ -89,19 +119,56 @@ namespace ev_charge_point_api.Services
                 throw new InvalidOperationException("Booking not found.");
 
             // apply 12-hour rule for time or status changes
-            var hoursUntilReservation = (existing.ReservationDateTime - DateTime.UtcNow).TotalHours;
+            var bookingDateTime = existing.BookingDate.Date.Add(existing.StartTime.TimeOfDay);
+            var hoursUntilReservation = (bookingDateTime - DateTime.UtcNow).TotalHours;
             if (hoursUntilReservation < 12 && updateDto.Status != BookingStatus.Completed)
                 throw new InvalidOperationException("Bookings can only be updated at least 12 hours before the reservation time.");
 
-            // If a new date/time is provided, apply it
-            if (updateDto.ReservationDateTime.HasValue)
+            // If new date/times are provided, apply them
+            if (updateDto.BookingDate.HasValue || updateDto.StartTime.HasValue || updateDto.EndTime.HasValue)
             {
-                var newDate = updateDto.ReservationDateTime.Value;
-                var daysAhead = (newDate - DateTime.UtcNow).TotalDays;
-                if (daysAhead > 7 || daysAhead < 0)
-                    throw new InvalidOperationException("Reservation date must be within 7 days from now.");
+                var newBookingDate = updateDto.BookingDate ?? existing.BookingDate;
+                var newStartTime = updateDto.StartTime ?? existing.StartTime;
+                var newEndTime = updateDto.EndTime ?? existing.EndTime;
 
-                existing.ReservationDateTime = newDate;
+                // Validate booking date is not in the past
+                var bookingDateOnly = newBookingDate.Date;
+                var today = DateTime.UtcNow.Date;
+                if (bookingDateOnly < today)
+                    throw new InvalidOperationException("Booking date cannot be in the past.");
+
+                // apply 7-day rule for booking date
+                var diff = (bookingDateOnly - today).TotalDays;
+                if (diff > 7)
+                    throw new InvalidOperationException("Reservation must be within 7 days from now.");
+
+                // Validate start time is before end time
+                if (newStartTime >= newEndTime)
+                    throw new InvalidOperationException("Start time must be before end time.");
+
+                // Ensure booking duration is reasonable (e.g., max 24 hours)
+                var duration = (newEndTime - newStartTime).TotalHours;
+                if (duration > 24)
+                    throw new InvalidOperationException("Booking duration cannot exceed 24 hours.");
+
+                // Check for conflicts when updating reservation time
+                var allBookings = await _bookingRepository.GetAllAsync();
+                var conflictingBooking = allBookings.FirstOrDefault(b => 
+                    b.Id != existing.Id && // Exclude current booking
+                    b.StationId == existing.StationId && 
+                    b.SlotId == existing.SlotId && 
+                    b.BookingDate.Date == newBookingDate.Date &&
+                    b.Status != BookingStatus.Cancelled &&
+                    b.IsActive &&
+                    // Check for time overlap
+                    newStartTime < b.EndTime && newEndTime > b.StartTime);
+
+                if (conflictingBooking != null)
+                    throw new InvalidOperationException("This slot is already booked during the selected time period on this date.");
+
+                existing.BookingDate = newBookingDate;
+                existing.StartTime = newStartTime;
+                existing.EndTime = newEndTime;
             }
 
             // If a status update is provided, apply it
@@ -126,7 +193,8 @@ namespace ev_charge_point_api.Services
                 throw new InvalidOperationException("Booking not found.");
 
             // apply 12-hour rule for cancellation
-            var hoursUntilReservation = (existing.ReservationDateTime - DateTime.UtcNow).TotalHours;
+            var bookingDateTime = existing.BookingDate.Date.Add(existing.StartTime.TimeOfDay);
+            var hoursUntilReservation = (bookingDateTime - DateTime.UtcNow).TotalHours;
             if (hoursUntilReservation < 12)
                 throw new InvalidOperationException("Bookings can only be cancelled at least 12 hours before reservation.");
 
