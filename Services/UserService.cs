@@ -1,4 +1,5 @@
-﻿using ev_charge_point_api.Models;
+﻿using ev_charge_point_api.Dtos;
+using ev_charge_point_api.Models;
 using ev_charge_point_api.Repositories;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ public class UserService
         return _userRepository.CreateAsync(user);
     }
 
-    public Task<List<User>> GetAllUsersAsync() => _userRepository.GetAllAsync();
+    public Task<List<UserResponseDto>> GetAllUsersAsync() => _userRepository.GetAllAsync();
 
     public Task<User> GetUserByIdAsync(string id) => _userRepository.GetByIdAsync(id);
 

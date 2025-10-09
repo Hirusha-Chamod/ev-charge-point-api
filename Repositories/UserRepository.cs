@@ -1,4 +1,5 @@
-﻿using ev_charge_point_api.Models;
+﻿using ev_charge_point_api.Dtos;
+using ev_charge_point_api.Models;
 using ev_charge_point_api.Services;
 using MongoDB.Driver;
 
@@ -22,9 +23,17 @@ namespace ev_charge_point_api.Repositories
         }
 
         // Read all
-        public async Task<List<User>> GetAllAsync()
+        public async Task<List<UserResponseDto>> GetAllAsync()
         {
-            return await _users.Find(u => true).ToListAsync();
+            return await _users.Find(u => true)
+                .Project(u => new UserResponseDto
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    Email = u.Email,
+                    Role = u.Role,
+                })
+                .ToListAsync();
         }
 
         // Read by Id

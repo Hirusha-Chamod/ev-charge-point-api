@@ -1,8 +1,9 @@
-﻿using ev_charge_point_api.Models;
+﻿using ev_charge_point_api.Dtos;
+using ev_charge_point_api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-[Authorize]
+[Authorize(Roles = "BackOffice")]
 [ApiController]
 [Route("api/[controller]")]
 public class UserController : ControllerBase
@@ -13,14 +14,13 @@ public class UserController : ControllerBase
     {
         _userService = userService;
     }
-    [Authorize(Roles = "BackOffice")]
+
     [HttpGet]
-    public Task<List<User>> GetAll() => _userService.GetAllUsersAsync();
+    public Task<List<UserResponseDto>> GetAll() => _userService.GetAllUsersAsync();
 
     [HttpGet("{id}")]
     public Task<User> Get(string id) => _userService.GetUserByIdAsync(id);
 
-    [Authorize(Roles = "BackOffice")]
     [HttpPost]
     public Task<User> Create(User user) => _userService.CreateUserAsync(user);
 

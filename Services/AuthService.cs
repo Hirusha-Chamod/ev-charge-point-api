@@ -62,14 +62,7 @@ public class AuthService
         return new
         {
             token = jwtToken,
-            refreshToken = refreshToken.Token,
-            user = new
-            {
-                Id = user.Id,
-                user.Name,
-                user.Email,
-                Role = user.Role.ToString()
-            }
+            refreshToken = refreshToken.Token
         };
     }
 
