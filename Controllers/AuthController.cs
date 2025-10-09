@@ -1,4 +1,15 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <project>EV Charging Station Management</project>
+// <file>AuthController.cs</file>
+// <author>GOMIS R J S (IT22349606)</author>
+// <module>SE4040 - Enterprise Application Development</module>
+// <date>2025-10-10</date>
+// <summary>
+//   Exposes API endpoints for managing authentication. Including the refresh endpoint for token refreshing.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]

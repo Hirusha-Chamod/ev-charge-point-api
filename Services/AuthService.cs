@@ -1,4 +1,16 @@
-﻿using ev_charge_point_api.Models;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <project>EV Charging Station Management</project>
+// <file>AuthController.cs</file>
+// <author>GOMIS R J S (IT22349606)</author>
+// <module>SE4040 - Enterprise Application Development</module>
+// <date>2025-10-10</date>
+// <summary>
+//   Implements the business logic for managing authentication, acting as the mediator
+//   between the controller and the repository.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+using ev_charge_point_api.Models;
 using ev_charge_point_api.Repositories;
 using ev_charge_point_api.Settings;
 using Microsoft.Extensions.Options;

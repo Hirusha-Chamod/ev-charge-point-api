@@ -1,4 +1,15 @@
-﻿using ev_charge_point_api.Models;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <project>EV Charging Station Management</project>
+// <file>AuthController.cs</file>
+// <author>GOMIS R J S (IT22349606)</author>
+// <module>SE4040 - Enterprise Application Development</module>
+// <date>2025-10-10</date>
+// <summary>
+//   Implements the data access logic for refresh tokens.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+using ev_charge_point_api.Models;
 using ev_charge_point_api.Services;
 using MongoDB.Driver;
 using System;

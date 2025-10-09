@@ -1,4 +1,16 @@
-﻿using ev_charge_point_api.Dtos;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <project>EV Charging Station Management</project>
+// <file>AuthController.cs</file>
+// <author>GOMIS R J S (IT22349606)</author>
+// <module>SE4040 - Enterprise Application Development</module>
+// <date>2025-10-10</date>
+// <summary>
+//   Implements the business logic for managing station operator and back office users, acting as the mediator
+//   between the controller and the repository.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+using ev_charge_point_api.Dtos;
 using ev_charge_point_api.Models;
 using ev_charge_point_api.Repositories;
 using System.Collections.Generic;
@@ -23,7 +35,7 @@ public class UserService
 
     public Task<User> GetUserByIdAsync(string id) => _userRepository.GetByIdAsync(id);
 
-    public Task<bool> UpdateUserAsync(string id, User user) => _userRepository.UpdateAsync(id, user);
+    public Task<bool> UpdateUserAsync(string id, UserResponseDto user) => _userRepository.UpdateAsync(id, user);
 
     public Task<bool> DeleteUserAsync(string id) => _userRepository.DeleteAsync(id);
 }

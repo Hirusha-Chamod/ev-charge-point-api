@@ -1,6 +1,18 @@
-﻿using ev_charge_point_api.Dtos;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <project>EV Charging Station Management</project>
+// <file>AuthController.cs</file>
+// <author>GOMIS R J S (IT22349606)</author>
+// <module>SE4040 - Enterprise Application Development</module>
+// <date>2025-10-10</date>
+// <summary>
+//   Implements the data access logic for Station operator and Back officer users
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+using ev_charge_point_api.Dtos;
 using ev_charge_point_api.Models;
 using ev_charge_point_api.Services;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace ev_charge_point_api.Repositories
@@ -49,9 +61,14 @@ namespace ev_charge_point_api.Repositories
         }
 
         // Update
-        public async Task<bool> UpdateAsync(string id, User updatedUser)
+        public async Task<bool> UpdateAsync(string id, UserResponseDto updatedUser)
         {
-            var result = await _users.ReplaceOneAsync(u => u.Id == id, updatedUser);
+            var update = Builders<User>.Update
+                .Set(u => u.Name, updatedUser.Name)
+                .Set(u => u.Email, updatedUser.Email)
+                .Set(u => u.Role, updatedUser.Role);
+
+            var result = await _users.UpdateOneAsync(u =>  u.Id == id, update);
             return result.ModifiedCount > 0;
         }
 
