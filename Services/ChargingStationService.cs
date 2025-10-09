@@ -137,22 +137,24 @@ namespace ev_charge_point_api.Services
             }
             var allSlotIds = station.Slots.Select(s => s.SlotId).ToHashSet();
 
+
+            var desiredStartTimeUtc = desiredStartTime.ToUniversalTime();
+            var desiredEndTimeUtc = desiredEndTime.ToUniversalTime();
+
             var futureBookings = await _bookingRepository.GetActiveBookingsByStationAsync(stationId);
 
-            // Filter in-memory to find the specific conflicts for our desired time range.
             var unavailableSlotIds = futureBookings
                 .Where(b =>
                 {
 
-                    var existingStartTime = b.StartTime;
-                    var existingEndTime = b.EndTime;
+                    var existingStartTimeUtc = b.StartTime.ToUniversalTime();
+                    var existingEndTimeUtc = b.EndTime.ToUniversalTime();
 
-                    return existingStartTime < desiredEndTime && existingEndTime > desiredStartTime;
+                    return existingStartTimeUtc < desiredEndTimeUtc && existingEndTimeUtc > desiredStartTimeUtc;
                 })
                 .Select(b => b.SlotId)
                 .ToHashSet();
 
-            // The available slots are all slots MINUS the unavailable ones
             return allSlotIds.Where(id => !unavailableSlotIds.Contains(id));
         }
     }
