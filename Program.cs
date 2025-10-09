@@ -15,18 +15,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //cors
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins"; 
-    builder.Services.AddCors(options =>
-    {
-        options.AddPolicy(name: MyAllowSpecificOrigins,
-                          policy =>
-                          {
-                              policy.WithOrigins("http://localhost:5173")
-                                    .AllowAnyMethod() // Or specify specific methods like WithMethods("GET", "POST")
-                                    .AllowAnyHeader(); // Or specify specific headers like WithHeaders("Content-Type")
-                                    // .AllowCredentials(); // If you need to send cookies or HTTP authentication
-                          });
-    });
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins("http://localhost:5173")
+                                .AllowAnyMethod() // Or specify specific methods like WithMethods("GET", "POST")
+                                .AllowAnyHeader(); // Or specify specific headers like WithHeaders("Content-Type")
+                                                   // .AllowCredentials(); // If you need to send cookies or HTTP authentication
+                      });
+});
 
 // JWT configuration
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
@@ -83,14 +83,15 @@ builder.Services.AddScoped<IBookingService, BookingService>();
 
 var app = builder.Build();
 
+app.UseSwagger();
+app.UseSwaggerUI();
+
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    // Development-only tools.
 }
 
 app.UseCors(MyAllowSpecificOrigins);
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
