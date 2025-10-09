@@ -32,5 +32,8 @@ namespace ev_charge_point_api.Repositories
 
         // Marks a charging station as inactive in the database.
         Task<bool> DeactivateAsync(string id);
+
+        // Marks a charging station as active in the database.
+        Task<bool> ActivateAsync(string id);
     }
 }

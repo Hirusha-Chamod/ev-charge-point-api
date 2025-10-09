@@ -74,5 +74,14 @@ namespace ev_charge_point_api.Repositories
             var result = await _stationsCollection.UpdateOneAsync(filter, update);
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
+
+        // Sets the IsActive flag to true for a specific charging station document.
+        public async Task<bool> ActivateAsync(string id)
+        {
+            var filter = Builders<ChargingStation>.Filter.Eq(s => s.Id, id);
+            var update = Builders<ChargingStation>.Update.Set(s => s.IsActive, true);
+            var result = await _stationsCollection.UpdateOneAsync(filter, update);
+            return result.IsAcknowledged && result.ModifiedCount > 0;
+        }
     }
 }

@@ -33,5 +33,11 @@ namespace ev_charge_point_api.Services
 
         // Deactivates a charging station, subject to business rules.
         Task<bool> DeactivateStationAsync(string id);
+
+        // Activates a charging station.
+        Task<bool> ActivateStationAsync(string id);
+
+        // Gets available slots for a specific station at a desired time.
+        Task<IEnumerable<int>> GetAvailableSlotsAsync(string stationId, DateTime desiredStartTime, DateTime desiredEndTime);
     }
 }

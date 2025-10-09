@@ -98,5 +98,36 @@ namespace ev_charge_point_api.Controllers
             }
             return NoContent();
         }
+
+        // Activates a station
+        [HttpPatch("{id}/activate")]
+        [Authorize(Roles = "BackOffice,StationOperator")]
+        public async Task<IActionResult> Activate(string id)
+        {
+            var success = await _stationService.ActivateStationAsync(id);
+            if (!success)
+            {
+                return NotFound("Station with the provided ID not found.");
+            }
+            return NoContent();
+        }
+
+        // Gets available slots for a station at a specific time.
+        [HttpGet("{id}/available-slots")]
+        public async Task<IActionResult> GetAvailableSlots(string id, [FromQuery] DateTime desiredStartTime, [FromQuery] DateTime desiredEndTime)
+        {
+            if (desiredStartTime == default || desiredEndTime == default)
+            {
+                return BadRequest("Both 'desiredStartTime' and 'desiredEndTime' query parameters are required.");
+            }
+
+            if (desiredStartTime >= desiredEndTime)
+            {
+                return BadRequest("'desiredEndTime' must be after 'desiredStartTime'.");
+            }
+
+            var availableSlots = await _stationService.GetAvailableSlotsAsync(id, desiredStartTime, desiredEndTime);
+            return Ok(availableSlots);
+        }
     }
 }

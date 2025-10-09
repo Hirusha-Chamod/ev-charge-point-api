@@ -19,11 +19,14 @@ namespace ev_charge_point_api.Services
     public class ChargingStationService : IChargingStationService
     {
         private readonly IChargingStationRepository _stationRepository;
+        private readonly IBookingRepository _bookingRepository;
 
         // Initializes a new instance of the ChargingStationService class.
-        public ChargingStationService(IChargingStationRepository stationRepository)
+        public ChargingStationService(IChargingStationRepository stationRepository, IBookingRepository bookingRepository)
         {
             _stationRepository = stationRepository;
+            _bookingRepository = bookingRepository;
+
         }
 
         // Creates a new charging station based on the provided DTO data.
@@ -51,7 +54,30 @@ namespace ev_charge_point_api.Services
         public async Task<bool> DeactivateStationAsync(string id)
         {
 
+            var activeBookings = await _bookingRepository.GetActiveBookingsByStationAsync(id);
+            if (activeBookings.Any())
+            {
+                // Rule violated: active bookings exist, so return failure.
+                return false;
+            }
             return await _stationRepository.DeactivateAsync(id);
+        }
+
+        // Activates a specific charging station.
+        public async Task<bool> ActivateStationAsync(string id)
+        {
+            var stationToActivate = await _stationRepository.GetByIdAsync(id);
+            if (stationToActivate is null)
+            {
+                return false; // The station doesn't exist, so we can't activate it.
+            }
+
+            if (stationToActivate.IsActive)
+            {
+                return true;
+            }
+
+            return await _stationRepository.ActivateAsync(id);
         }
 
         // Retrieves all charging stations.
@@ -99,6 +125,35 @@ namespace ev_charge_point_api.Services
         public async Task<IEnumerable<ChargingStation>> GetNearbyStationsAsync(double longitude, double latitude)
         {
             return await _stationRepository.GetNearbyAsync(longitude, latitude);
+        }
+
+        // Gets available slots for a specific station at a desired time.
+        public async Task<IEnumerable<int>> GetAvailableSlotsAsync(string stationId, DateTime desiredStartTime, DateTime desiredEndTime)
+        {
+            var station = await _stationRepository.GetByIdAsync(stationId);
+            if (station == null || station.Slots == null)
+            {
+                return Enumerable.Empty<int>();
+            }
+            var allSlotIds = station.Slots.Select(s => s.SlotId).ToHashSet();
+
+            var futureBookings = await _bookingRepository.GetActiveBookingsByStationAsync(stationId);
+
+            // Filter in-memory to find the specific conflicts for our desired time range.
+            var unavailableSlotIds = futureBookings
+                .Where(b =>
+                {
+
+                    var existingStartTime = b.StartTime;
+                    var existingEndTime = b.EndTime;
+
+                    return existingStartTime < desiredEndTime && existingEndTime > desiredStartTime;
+                })
+                .Select(b => b.SlotId)
+                .ToHashSet();
+
+            // The available slots are all slots MINUS the unavailable ones
+            return allSlotIds.Where(id => !unavailableSlotIds.Contains(id));
         }
     }
 }
