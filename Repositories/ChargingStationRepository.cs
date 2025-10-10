@@ -83,5 +83,20 @@ namespace ev_charge_point_api.Repositories
             var result = await _stationsCollection.UpdateOneAsync(filter, update);
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
+
+        // Updates the IsAvailable status of a single slot within a station.
+        public async Task<bool> UpdateSlotStatusAsync(string stationId, int slotId, bool isAvailable)
+        {
+            // Create a filter to find the specific station and the specific slot within its 'slots' array.
+            var filter = Builders<ChargingStation>.Filter.And(
+                Builders<ChargingStation>.Filter.Eq(s => s.Id, stationId),
+                Builders<ChargingStation>.Filter.ElemMatch(s => s.Slots, sl => sl.SlotId == slotId)
+            );
+            var update = Builders<ChargingStation>.Update.Set("slots.$.isAvailable", isAvailable);
+
+            var result = await _stationsCollection.UpdateOneAsync(filter, update);
+
+            return result.IsAcknowledged && result.ModifiedCount > 0;
+        }
     }
 }

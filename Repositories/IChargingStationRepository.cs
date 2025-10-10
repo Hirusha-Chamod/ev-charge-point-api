@@ -35,5 +35,8 @@ namespace ev_charge_point_api.Repositories
 
         // Marks a charging station as active in the database.
         Task<bool> ActivateAsync(string id);
+
+        // Updates the IsAvailable status of a single slot within a station.
+        Task<bool> UpdateSlotStatusAsync(string stationId, int slotId, bool isAvailable);
     }
 }

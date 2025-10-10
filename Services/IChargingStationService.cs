@@ -39,5 +39,8 @@ namespace ev_charge_point_api.Services
 
         // Gets available slots for a specific station at a desired time.
         Task<IEnumerable<int>> GetAvailableSlotsAsync(string stationId, DateTime desiredStartTime, DateTime desiredEndTime);
+
+        // Updates the availability of a specific slot.
+        Task<bool> UpdateSlotAvailabilityAsync(string stationId, int slotId, bool isAvailable);
     }
 }

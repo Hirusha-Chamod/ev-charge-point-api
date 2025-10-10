@@ -157,5 +157,26 @@ namespace ev_charge_point_api.Services
 
             return allSlotIds.Where(id => !unavailableSlotIds.Contains(id));
         }
+
+
+        // Updates the availability of a specific slot.
+        public async Task<bool> UpdateSlotAvailabilityAsync(string stationId, int slotId, bool isAvailable)
+        {
+            if (!isAvailable)
+            {
+                // Get all active (future, non-cancelled) bookings for the entire station.
+                var activeBookings = await _bookingRepository.GetActiveBookingsByStationAsync(stationId);
+
+                // Check if there are any active bookings specifically for the slot we are trying to disable.
+                bool hasConflictingBookings = activeBookings.Any(b => b.SlotId == slotId);
+
+                if (hasConflictingBookings)
+                {
+                    return false;
+                }
+            }
+
+            return await _stationRepository.UpdateSlotStatusAsync(stationId, slotId, isAvailable);
+        }
     }
 }

@@ -129,5 +129,19 @@ namespace ev_charge_point_api.Controllers
             var availableSlots = await _stationService.GetAvailableSlotsAsync(id, desiredStartTime, desiredEndTime);
             return Ok(availableSlots);
         }
+
+        [HttpPatch("{stationId}/slots/{slotId}")]
+        [Authorize(Roles = "Backoffice,StationOperator")]
+        public async Task<IActionResult> UpdateSlotStatus(string stationId, int slotId, [FromBody] UpdateSlotStatusDto dto)
+        {
+            var success = await _stationService.UpdateSlotAvailabilityAsync(stationId, slotId, dto.IsAvailable);
+
+            if (!success)
+            {
+                return NotFound("Station or slot not found, or status is already set to the desired value.");
+            }
+
+            return NoContent();
+        }
     }
 }
