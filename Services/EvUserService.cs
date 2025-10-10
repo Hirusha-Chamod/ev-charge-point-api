@@ -15,7 +15,7 @@ namespace ev_charge_point_api.Services
         public Task<EvUser> RegisterAsync(EvUser user) => _repo.CreateAsync(user);
 
         public Task<List<EvUser>> GetAllAsync() => _repo.GetAllAsync();
-
+        public Task<List<EvUser>> GetAllDeactiveAsync() => _repo.GetAllDeactiveAsync();
         public Task<EvUser> GetByNicAsync(string nic) => _repo.GetByNicAsync(nic);
 
         public async Task<bool> UpdateAsync(string nic, EvUser updated, string callerNic)

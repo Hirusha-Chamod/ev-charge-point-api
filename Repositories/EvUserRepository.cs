@@ -21,6 +21,10 @@ namespace ev_charge_point_api.Repositories
         }
 
         public async Task<List<EvUser>> GetAllAsync() => await _users.Find(u => true).ToListAsync();
+        public async Task<List<EvUser>> GetAllDeactiveAsync()
+        {
+            return await _users.Find(u => u.IsActive == false).ToListAsync();
+        }
 
         public async Task<EvUser> GetByNicAsync(string nic) => await _users.Find(u => u.Nic == nic).FirstOrDefaultAsync();
 
