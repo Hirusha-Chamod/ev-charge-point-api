@@ -37,6 +37,6 @@ namespace ev_charge_point_api.Repositories
         Task<bool> ActivateAsync(string id);
 
         // Updates the IsAvailable status of a single slot within a station.
-        Task<bool> UpdateSlotStatusAsync(string stationId, int slotId, bool isAvailable);
+        Task<bool> UpdateSlotStatusAsync(string stationId, int slotId, bool IsAvailable);
     }
 }

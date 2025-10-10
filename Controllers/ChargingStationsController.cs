@@ -19,7 +19,7 @@ namespace ev_charge_point_api.Controllers
 {
     [ApiController]
     [Route("api/stations")]
-     // All endpoints require authentication by default
+    [Authorize] // All endpoints require authentication by default
     public class ChargingStationsController : ControllerBase
     {
         private readonly IChargingStationService _stationService;
@@ -60,7 +60,7 @@ namespace ev_charge_point_api.Controllers
 
         // Creates a new station
         [HttpPost]
-        
+        [Authorize(Roles = "BackOffice,StationOperator")]
         public async Task<IActionResult> Create([FromBody] CreateStationDto createDto)
         {
             if (!ModelState.IsValid)
@@ -73,7 +73,7 @@ namespace ev_charge_point_api.Controllers
 
         // Updates an existing station
         [HttpPut("{id}")]
-        
+        [Authorize(Roles = "BackOffice,StationOperator")]
         public async Task<IActionResult> Update(string id, [FromBody] UpdateStationDto updateDto)
         {
             var success = await _stationService.UpdateStationAsync(id, updateDto);
@@ -88,7 +88,7 @@ namespace ev_charge_point_api.Controllers
 
         // Deactivates a station
         [HttpPatch("{id}/deactivate")]
-        
+        [Authorize(Roles = "BackOffice,StationOperator")]
         public async Task<IActionResult> Deactivate(string id)
         {
             var success = await _stationService.DeactivateStationAsync(id);
@@ -101,7 +101,7 @@ namespace ev_charge_point_api.Controllers
 
         // Activates a station
         [HttpPatch("{id}/activate")]
-        
+        [Authorize(Roles = "BackOffice,StationOperator")]
         public async Task<IActionResult> Activate(string id)
         {
             var success = await _stationService.ActivateStationAsync(id);
@@ -130,8 +130,9 @@ namespace ev_charge_point_api.Controllers
             return Ok(availableSlots);
         }
 
+        // Updates the availability status of a specific slot.
         [HttpPatch("{stationId}/slots/{slotId}")]
-        [Authorize(Roles = "Backoffice,StationOperator")]
+        [Authorize(Roles = "BackOffice,StationOperator")]
         public async Task<IActionResult> UpdateSlotStatus(string stationId, int slotId, [FromBody] UpdateSlotStatusDto dto)
         {
             var success = await _stationService.UpdateSlotAvailabilityAsync(stationId, slotId, dto.IsAvailable);

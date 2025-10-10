@@ -55,6 +55,7 @@ namespace ev_charge_point_api.Services
         {
 
             var activeBookings = await _bookingRepository.GetActiveBookingsByStationAsync(id);
+            Console.WriteLine($"Active bookings count for station {id}: {activeBookings.Count()}");
             if (activeBookings.Any())
             {
                 // Rule violated: active bookings exist, so return failure.
@@ -160,9 +161,9 @@ namespace ev_charge_point_api.Services
 
 
         // Updates the availability of a specific slot.
-        public async Task<bool> UpdateSlotAvailabilityAsync(string stationId, int slotId, bool isAvailable)
+        public async Task<bool> UpdateSlotAvailabilityAsync(string stationId, int slotId, bool IsAvailable)
         {
-            if (!isAvailable)
+            if (!IsAvailable)
             {
                 // Get all active (future, non-cancelled) bookings for the entire station.
                 var activeBookings = await _bookingRepository.GetActiveBookingsByStationAsync(stationId);
@@ -176,7 +177,7 @@ namespace ev_charge_point_api.Services
                 }
             }
 
-            return await _stationRepository.UpdateSlotStatusAsync(stationId, slotId, isAvailable);
+            return await _stationRepository.UpdateSlotStatusAsync(stationId, slotId, IsAvailable);
         }
     }
 }
