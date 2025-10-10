@@ -37,6 +37,15 @@ public class EvUserController : ControllerBase
     }
 
     [Authorize]
+    [HttpGet("deactive")]
+    public async Task<IActionResult> GetDeactiveUsers()
+    {
+        var users = await _service.GetAllDeactiveAsync();
+        if (users == null) return NotFound();
+        return Ok(users);
+    }
+
+    [Authorize]
     [HttpGet("{nic}")]
     public async Task<IActionResult> Get(string nic)
     {
