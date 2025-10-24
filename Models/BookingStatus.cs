@@ -16,6 +16,7 @@ namespace ev_charge_point_api.Models
         Pending,
         Approved,
         Cancelled,
-        Completed
+        Completed,
+        Arrived,
     }
 }
