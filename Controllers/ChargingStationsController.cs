@@ -135,11 +135,20 @@ namespace ev_charge_point_api.Controllers
         [Authorize(Roles = "BackOffice,StationOperator")]
         public async Task<IActionResult> UpdateSlotStatus(string stationId, int slotId, [FromBody] UpdateSlotStatusDto dto)
         {
-            var success = await _stationService.UpdateSlotAvailabilityAsync(stationId, slotId, dto.IsAvailable);
+            // Deconstruct the tuple returned from the service
+            var (success, errorMessage) = await _stationService.UpdateSlotAvailabilityAsync(stationId, slotId, dto.IsAvailable);
 
             if (!success)
             {
-                return NotFound("Station or slot not found, or status is already set to the desired value.");
+                // Check the error message to return the correct response
+                if (errorMessage == "There are pending bookings on this slot.")
+                {
+                    // Return BadRequest (400) with the specific message
+                    return BadRequest(errorMessage);
+                }
+
+                // Return NotFound (404) for other errors like "Station or slot not found."
+                return NotFound(errorMessage);
             }
 
             return NoContent();

@@ -161,7 +161,7 @@ namespace ev_charge_point_api.Services
 
 
         // Updates the availability of a specific slot.
-        public async Task<bool> UpdateSlotAvailabilityAsync(string stationId, int slotId, bool IsAvailable)
+        public async Task<(bool Success, string ErrorMessage)> UpdateSlotAvailabilityAsync(string stationId, int slotId, bool IsAvailable)
         {
             if (!IsAvailable)
             {
@@ -173,11 +173,21 @@ namespace ev_charge_point_api.Services
 
                 if (hasConflictingBookings)
                 {
-                    return false;
+                    // Return failure with the specific error message
+                    return (false, "There are pending bookings on this slot.");
                 }
             }
 
-            return await _stationRepository.UpdateSlotStatusAsync(stationId, slotId, IsAvailable);
+            var success = await _stationRepository.UpdateSlotStatusAsync(stationId, slotId, IsAvailable);
+
+            if (!success)
+            {
+                // Generic error if repository fails
+                return (false, "Station or slot not found.");
+            }
+
+            // Return success
+            return (true, string.Empty);
         }
     }
 }
